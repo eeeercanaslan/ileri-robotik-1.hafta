@@ -1,36 +1,20 @@
-#include "Wire.h"
-#include "I2CDev.h"
-#include "MPU6050.h"
-
-MPU6050 IMU;
-
-int16_t ax, ay, az;
-const float ACC_SCALE = 16384.0f; // ±2g için LSB/g
-
-void setup() {
-  Serial.begin(115200);
-  Wire.begin();
-  IMU.initialize();
-  // (İsteğe bağlı) aralık garantisi:
-  // IMU.setFullScaleAccelRange(MPU6050_ACCEL_FS_2); // ±2g
+#include "lsm6dsm.h"
+LSM6DSM IMU;
+void setup()
+{
+ Serial.begin(115200);
+ IMU.begin();
 }
 
 void loop() {
-  // Ham ivme değerlerini oku (LSB)
-  IMU.getAcceleration(&ax, &ay, &az);
-
-  // g cinsine çevir
-  float axg = ax / ACC_SCALE;
-  float ayg = ay / ACC_SCALE;
-  float azg = az / ACC_SCALE;
-
-  // LSM6DSM sürümündekiyle aynı formatta yazdır
-  Serial.print("accel_x: ");
-  Serial.println(axg, 6);
-  Serial.print("accel_y: ");
-  Serial.println(ayg, 6);
-  Serial.print("accel_z: ");
-  Serial.println(azg, 6);
-
-  delay(500);
+ float accAngleX;
+float accAngleY;
+accAngleX = atan(IMU.readFloatAccelX() / sqrt(pow(IMU.readFloatAccelY(), 2) +
+pow(IMU.readFloatAccelZ(), 2)+0.001)) * 180 / PI;
+accAngleY = atan(-1 * IMU.readFloatAccelY() / sqrt(pow(IMU.readFloatAccelX(), 2) +
+pow(IMU.readFloatAccelZ(), 2)+0.001)) * 180 / PI;
+ Serial.print("accAngleX: ");
+ Serial.println(accAngleX);
+ Serial.print("accAngleY: ");
+ Serial.println(accAngleY);
 }
